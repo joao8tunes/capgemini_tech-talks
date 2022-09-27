@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+# Capgemini (Brazil) - www.capgemini.com/br-pt
+# "People matter, results count"
+
+system:
+    format_user_names: true
+    csv:
+        input:
+            sep: "\t"
+            encoding: "utf-16"
+        output:
+            sep: "\t"
+            encoding: "utf-8"
+
+spreadsheets:
+    attendance_list:
+        user_name: "Full Name"
+        user_action: "User Action"

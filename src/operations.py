@@ -22,6 +22,8 @@ TYPES = (
     # ATTENDANCE_LIST_REPORT,
 )
 
+CSV_HEADER_DEFAULT = ["Full Name", "User Action", "Timestamp"]
+
 # TODO: fix Streamlit duplicate log bug.
 
 
@@ -29,8 +31,12 @@ def format_user_name(users_list: [str]) -> [str]:
     formatted_users_list = []
 
     for name in users_list:
-        last_name, name = name.split(",")
-        formatted_name = name.strip() + " " + last_name.strip()
+        if "," in name:
+            last_name, name = name.split(",")
+            formatted_name = name.strip() + " " + last_name.strip()
+        else:
+            formatted_name = name
+
         formatted_users_list.append(formatted_name)
 
     return formatted_users_list
@@ -47,6 +53,9 @@ def get_attendance_list(df_list: [pd.DataFrame], ignore_inactive_users: bool = T
 
     # Iterating over list of dataframes:
     for df in df_list:
+        if df.columns[0] != name:
+            df = df.set_axis(CSV_HEADER_DEFAULT, axis=1)
+
         users = df[name].drop_duplicates().tolist()
 
         # Ignoring users who left the meeting before it ended:
@@ -57,7 +66,7 @@ def get_attendance_list(df_list: [pd.DataFrame], ignore_inactive_users: bool = T
                 user_actions = df[df[name] == user][action].tolist()
                 last_user_action = user_actions[-1]
 
-                if last_user_action == "Joined":
+                if last_user_action.startswith("Joined"):
                     active_users.append(user)
 
             attendance_list = active_users

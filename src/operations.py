@@ -24,8 +24,6 @@ TYPES = (
 
 CSV_HEADER_DEFAULT = ["Full Name", "User Action", "Timestamp"]
 
-# TODO: fix Streamlit duplicate log bug.
-
 
 def format_user_name(users_list: [str]) -> [str]:
     formatted_users_list = []
@@ -60,16 +58,12 @@ def get_attendance_list(df_list: [pd.DataFrame], ignore_inactive_users: bool = T
 
         # Ignoring users who left the meeting before it ended:
         if ignore_inactive_users:
-            active_users = []
-
             for user in users:
                 user_actions = df[df[name] == user][action].tolist()
                 last_user_action = user_actions[-1]
 
                 if last_user_action.startswith("Joined"):
-                    active_users.append(user)
-
-            attendance_list = active_users
+                    attendance_list.append(user)
         else:
             attendance_list.extend(users)
 
@@ -85,19 +79,20 @@ def get_attendance_list(df_list: [pd.DataFrame], ignore_inactive_users: bool = T
     return df
 
 
-def get_attendance_list_count(df_list: [pd.DataFrame], ignore_inactive_users: bool = True) -> int:
-    logging.info("Fetching the attendance list count...")
-    df = get_attendance_list(df_list=df_list, ignore_inactive_users=ignore_inactive_users)
-    count = df.shape[0]
+def extract_users_list(df: pd.DataFrame) -> [str]:
+    settings = get_settings()
+    attendance_list_settings = settings['spreadsheets']['attendance_list']
+    name = attendance_list_settings['user_name']
+    users_list = df[name].tolist()
 
-    return count
+    return users_list
 
 
 def giveaway_vouchers(
-        df_list: [pd.DataFrame],
+        users_list: [str],
         number: int = 2,
         allow_duplicates: bool = False,
-        ignore_inactive_users: bool = True
+        ignore_users: [str] = None
 ) -> pd.DataFrame:
     assert 1 <= number
 
@@ -106,24 +101,26 @@ def giveaway_vouchers(
     attendance_list_settings = settings['spreadsheets']['attendance_list']
     name = attendance_list_settings['user_name']
 
-    attendance_list = get_attendance_list(df_list=df_list, ignore_inactive_users=ignore_inactive_users)[name].tolist()
-    attendance_list_count = len(attendance_list)
+    if ignore_users:
+        users_list = [user for user in users_list if user not in ignore_users]
+
+    attendance_list_count = len(users_list)
     lucky_users = []
 
-    if not allow_duplicates and not number <= len(attendance_list):
+    if not allow_duplicates and not number <= attendance_list_count:
         logging.warning(
             f"The number of winners cannot be greater than the size of the attendance list "
             f"(number <= {attendance_list_count})."
         )
 
     for _ in range(number):
-        selected_user = random.choice(attendance_list)
+        selected_user = random.choice(users_list)
         lucky_users.append(selected_user)
 
         if not allow_duplicates:
-            attendance_list.remove(selected_user)
+            users_list.remove(selected_user)
 
-            if not attendance_list:
+            if not users_list:
                 break
 
     df = pd.DataFrame(lucky_users, columns=[name])

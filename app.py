@@ -32,68 +32,73 @@ def main() -> None:
         help="Ignore users not present at the time the attendance list was generated"
     )
 
+    users_list = []
+    num_vouchers = 2
+    ignore_users = []
+    allow_duplicates = False
+    df = None
+
+    if input_files:
+        df_list = load_csv(input_files)
+        df = operations.get_attendance_list(df_list=df_list, ignore_inactive_users=ignore_inactive_users)
+        users_list = operations.extract_users_list(df=df)
+
     st.sidebar.markdown("""---""")
     st.sidebar.write('**PROCESSES**')
     operation_type = st.sidebar.selectbox("Operation type", operations.TYPES)
 
     if operation_type == operations.ATTENDANCE_LIST_DRAW_VOUCHER:
         num_vouchers = st.sidebar.slider("Number of vouchers", min_value=1, max_value=10, value=2)
+        ignore_users = st.sidebar.multiselect("Ignore users", users_list, [])
         allow_duplicates = st.sidebar.checkbox("Allow duplicates winners", value=False)
 
-    if st.sidebar.button("Run") and input_files is not None:
-        df_list = load_csv(input_files)
+    if st.sidebar.button("Run") and input_files:
+        logging.debug(f"Executing operation '{operation_type}'...")
 
-        if df_list:
-            logging.debug(f"Executing operation '{operation_type}'...")
+        if operation_type == operations.ATTENDANCE_LIST_COUNT:
+            count = len(users_list)
+            st.markdown(
+                f"Following the attendance list count: <mark style='background-color: lightblue'>{count}</mark>",
+                unsafe_allow_html=True
+            )
+        elif operation_type == operations.ATTENDANCE_LIST:
+            st.write("Attendance list:")
+            st.dataframe(df, use_container_width=True)
+            csv = df_to_bytes(df)
 
-            if operation_type == operations.ATTENDANCE_LIST_COUNT:
-                count = operations.get_attendance_list_count(
-                    df_list=df_list,
-                    ignore_inactive_users=ignore_inactive_users
-                )
-                st.markdown(
-                    f"Following the attendance list count: <mark style='background-color: lightblue'>{count}</mark>",
-                    unsafe_allow_html=True
-                )
-            elif operation_type == operations.ATTENDANCE_LIST:
-                df = operations.get_attendance_list(df_list=df_list, ignore_inactive_users=ignore_inactive_users)
-                st.write("Attendance list:")
-                st.dataframe(df, use_container_width=True)
-                csv = df_to_bytes(df)
+            st.download_button(
+                label="Download",
+                data=csv,
+                file_name="attendance_list.csv",
+                mime="text/csv",
+            )
+        elif operation_type == operations.ATTENDANCE_LIST_DRAW_VOUCHER:
+            # Displaying progress bar on screen:
+            pbar = st.progress(0)
 
-                st.download_button(
-                    label="Download",
-                    data=csv,
-                    file_name="attendance_list.csv",
-                    mime="text/csv",
-                )
-            elif operation_type == operations.ATTENDANCE_LIST_DRAW_VOUCHER:
-                # Displaying progress bar on screen:
-                pbar = st.progress(0)
+            for percent_complete in range(100):
+                time.sleep(0.05)
+                pbar.progress(percent_complete + 1)
 
-                for percent_complete in range(100):
-                    time.sleep(0.1)
-                    pbar.progress(percent_complete + 1)
+            pbar.empty()
 
-                pbar.empty()
+            # Fetching and displaying the list of winners on the screen:
+            df = operations.giveaway_vouchers(
+                users_list=users_list,
+                number=num_vouchers,
+                allow_duplicates=allow_duplicates,
+                ignore_users=ignore_users
+            )
+            st.write("List of winners:")
+            st.dataframe(df, use_container_width=True)
+            csv = df_to_bytes(df)
 
-                # Fetching and displaying the list of winners on the screen:
-                df = operations.giveaway_vouchers(
-                    df_list=df_list,
-                    number=num_vouchers,
-                    allow_duplicates=allow_duplicates,
-                    ignore_inactive_users=ignore_inactive_users
-                )
-                st.write("List of winners:")
-                st.dataframe(df, use_container_width=True)
-                csv = df_to_bytes(df)
-
-                st.download_button(
-                    label="Download",
-                    data=csv,
-                    file_name="vouchers_winners.csv",
-                    mime="text/csv",
-                )
+            st.download_button(
+                label="Download",
+                data=csv,
+                file_name="vouchers_winners.csv",
+                mime="text/csv",
+            )
 
 
 if __name__ == '__main__':

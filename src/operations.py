@@ -23,9 +23,41 @@ TYPES = (
 )
 
 CSV_HEADER_DEFAULT = ["Full Name", "User Action", "Timestamp"]
+TRANSLATIONS = {
+    'header': {
+        'Full Name': "Full Name",
+        'Nome Completo': "Full Name",
+        'User Action': "User Action",
+        'Atividade': "User Action",
+        'Timestamp': "Timestamp",
+        'Carimbo de data/hora': "Timestamp"
+    },
+    'users_actions': {
+        'Joined': "Joined",
+        'Ingressou': "Joined",
+        'Joined before': "Joined before",
+        'Entrou antes de': "Joined before",
+        'Left': "Left",
+        'Saiu': "Left",
+    }
+}
+
+
+def translate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    def translate_header_column(string: str) -> str:
+        translation = TRANSLATIONS['header'][string]
+
+        return translation
+
+    new_header = list(map(translate_header_column, list(df.columns)))
+    df = df.set_axis(new_header, axis=1)
+    df['User Action'] = df['User Action'].map(TRANSLATIONS['users_actions']).fillna(TRANSLATIONS['users_actions'])
+
+    return df
 
 
 def format_user_name(users_list: [str]) -> [str]:
+    # TODO: only supports English and Portuguese.
     formatted_users_list = []
 
     for name in users_list:
@@ -51,9 +83,8 @@ def get_attendance_list(df_list: [pd.DataFrame], ignore_inactive_users: bool = T
 
     # Iterating over list of dataframes:
     for df in df_list:
-        if df.columns[0] != name:
-            df = df.set_axis(CSV_HEADER_DEFAULT, axis=1)
-
+        df = df.dropna(how="all")
+        df = translate_dataframe(df)
         users = df[name].drop_duplicates().tolist()
 
         # Ignoring users who left the meeting before it ended:

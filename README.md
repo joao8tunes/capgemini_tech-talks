@@ -34,7 +34,7 @@ The script configuration is based on the YAML language and can be changed by edi
 Run Streamlit application:
 
 ```console
-(venv) user@host:~$ streamlit run .\app.py
+(venv) user@host:~$ streamlit run .\streamlit_app.py
 ```
 
 

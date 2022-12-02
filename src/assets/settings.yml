@@ -15,6 +15,15 @@ system:
             encoding: "utf-8"
 
 spreadsheets:
+    event:
+        start_time: "17:00"
+        end_time: "17:45"
+        check_time_slot: true  # TODO: Experimental
+        check_user_name: true  # TODO: Experimental
+        check_user_name_similarity: 0.9
     attendance_list:
         user_name: "Full Name"
         user_action: "User Action"
+        timestamp: "Timestamp"
+        date: "Date"
+        duration: "Uptime (min)"

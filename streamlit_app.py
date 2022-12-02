@@ -36,16 +36,30 @@ def main() -> None:
     num_vouchers = 2
     ignore_users = []
     allow_duplicates = False
+    calculate_overall_uptime = False
+    df_list = None
     df = None
+
+    st.sidebar.markdown("""---""")
+    st.sidebar.write('**PROCESS**')
+    operation_type = st.sidebar.selectbox("Operation type", operations.TYPES)
+
+    if operation_type == operations.ATTENDANCE_LIST:
+        calculate_overall_uptime = st.sidebar.checkbox(
+            "Calculate overall uptime",
+            value=False,
+            help="Calculates overall uptime per user (useful for multiple events)"
+        )
 
     if input_files:
         df_list = load_csv(input_files)
-        df = operations.get_attendance_list(df_list=df_list, ignore_inactive_users=ignore_inactive_users)
-        users_list = operations.extract_users_list(df=df)
+        df = operations.get_attendance_list(
+            df_list=df_list,
+            ignore_inactive_users=ignore_inactive_users,
+            calculate_overall_uptime=calculate_overall_uptime
+        )
 
-    st.sidebar.markdown("""---""")
-    st.sidebar.write('**PROCESSES**')
-    operation_type = st.sidebar.selectbox("Operation type", operations.TYPES)
+        users_list = operations.extract_users_list(df=df)
 
     if operation_type == operations.ATTENDANCE_LIST_DRAW_VOUCHER:
         num_vouchers = st.sidebar.slider("Number of vouchers", min_value=1, max_value=10, value=2)

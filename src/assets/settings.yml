@@ -27,3 +27,4 @@ spreadsheets:
         timestamp: "Timestamp"
         date: "Date"
         duration: "Uptime (min)"
+        attendance: "Attendance"

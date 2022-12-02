@@ -130,6 +130,7 @@ def get_attendance_list(
     col_timestamp = attendance_list_settings['timestamp']
     col_date = attendance_list_settings['date']
     col_duration = attendance_list_settings['duration']
+    col_attendance = attendance_list_settings['attendance']
     attendance_list = []
 
     # Iterating over list of dataframes:
@@ -248,9 +249,11 @@ def get_attendance_list(
     if calculate_overall_uptime:
         for user in all_users:
             df.loc[(df[col_name] == user), col_duration] = math.ceil(df[df[col_name] == user][col_duration].sum())
+            df.loc[(df[col_name] == user), col_attendance] = df[df[col_name] == user][col_duration].count()
 
-        df = df[[col_name, col_duration]].drop_duplicates()
-        df = df.sort_values(by=[col_duration], ascending=False).reset_index(drop=True)
+        df = df[[col_name, col_attendance, col_duration]].drop_duplicates()
+        df[col_attendance] = df[col_attendance].astype(df[col_duration].iloc[0].dtype)
+        df = df.sort_values(by=[col_attendance, col_duration], ascending=False).reset_index(drop=True)
     else:
         df = df[[col_name, col_date, col_duration]].drop_duplicates()
         df = df.sort_values(by=[col_date, col_duration], ascending=False).reset_index(drop=True)

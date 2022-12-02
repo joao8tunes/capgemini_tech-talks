@@ -163,12 +163,10 @@ def get_attendance_list(
     if format_names:
         df[col_name] = df[col_name].apply(format_user_name)
 
-    all_users = df[col_name].unique().tolist()
-
     # Validating usernames, to ensure that users who sign in through different Teams accounts that possibly have
     # different names, are identified as being the same user:
     if check_user_name:
-        all_users = sorted(all_users, key=len, reverse=True)
+        all_users = sorted(df[col_name].unique().tolist(), key=len, reverse=True)
         user_remap = {all_users[0]: all_users[0]}
 
         for user in all_users[1:]:
@@ -177,7 +175,6 @@ def get_attendance_list(
             user_remap[user] = match if similarity >= check_user_name_similarity else user
 
         df[col_name] = df[col_name].map(user_remap)
-        all_users = df[col_name].unique().tolist()
 
     # Validating users actions regarding the events' time slot. If the user left before the event started,
     # ignore their actions; otherwise, adjust the input/output timestamps to the event's previous defined time slot:
@@ -211,6 +208,8 @@ def get_attendance_list(
 
     # Dropping duplicate rows, keeping the first occurrence:
     df = df.dropna(how="any").drop_duplicates(subset=[col_name, col_timestamp], keep="first")
+
+    all_users = df[col_name].unique().tolist()
 
     for user in all_users:
         df_user = df[df[col_name] == user]

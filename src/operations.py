@@ -74,14 +74,16 @@ def format_user_name(user_name: str) -> str:
     return formatted_name
 
 
-def left_before_event_starts(user_actions: pd.Series, timestamps: pd.Series, start_time: str, end_time: str) -> bool:
+def user_did_not_participate(user_actions: pd.Series, timestamps: pd.Series, start_time: str, end_time: str) -> bool:
     event_date = timestamps.iloc[0].date()
     event_start_time = pd.to_datetime(f"{event_date} {start_time}", infer_datetime_format=True, errors="coerce")
     event_end_time = pd.to_datetime(f"{event_date} {end_time}", infer_datetime_format=True, errors="coerce")
 
     left_before = True if user_actions.iloc[-1] == "Left" and timestamps.iloc[-1] < event_start_time else False
+    join_after = True if user_actions.iloc[-1] == "Joined" and timestamps.iloc[-1] > event_end_time else False
+    user_off_event = left_before or join_after
 
-    return left_before
+    return user_off_event
 
 
 def coerce_time_slot(action_timestamp: datetime, start_time: str, end_time: str) -> datetime:
@@ -111,6 +113,8 @@ def ignore_time_slot(action_timestamp: datetime, start_time: str, end_time: str)
 
 def get_attendance_list(
         df_list: [pd.DataFrame],
+        event_start_time: str = None,
+        event_end_time: str = None,
         ignore_inactive_users: bool = True,
         calculate_overall_uptime: bool = False
 ) -> pd.DataFrame:
@@ -122,8 +126,13 @@ def get_attendance_list(
     check_user_name = event_settings['check_user_name']
     check_user_name_similarity = event_settings['check_user_name_similarity']
     check_time_slot = event_settings['check_time_slot']
-    event_start_time = event_settings['start_time']
-    event_end_time = event_settings['end_time']
+
+    if not event_start_time:
+        event_start_time = event_settings['start_time']
+
+    if not event_end_time:
+        event_end_time = event_settings['end_time']
+
     attendance_list_settings = settings['spreadsheets']['attendance_list']
     col_name = attendance_list_settings['user_name']
     col_action = attendance_list_settings['user_action']
@@ -189,7 +198,7 @@ def get_attendance_list(
                 df_user = df_date[df_date[col_name] == user]
                 user_actions, timestamps = df_user[col_action], df_user[col_timestamp]
 
-                user_did_not_participate = left_before_event_starts(
+                user_off_event = user_did_not_participate(
                     user_actions=user_actions,
                     timestamps=timestamps,
                     start_time=event_start_time,
@@ -197,17 +206,19 @@ def get_attendance_list(
                 )
 
                 # Checking if the last user action is in the event time slot, otherwise, ignore it:
-                if user_did_not_participate:
-                    df.loc[(df[col_date] == date) & (df[col_name] == user), col_timestamp].apply(
-                        lambda t: ignore_time_slot(t, event_start_time, event_end_time)
-                    )
+                if user_off_event:
+                    df.loc[(df[col_date] == date) & (df[col_name] == user), col_timestamp] = \
+                        df.loc[(df[col_date] == date) & (df[col_name] == user), col_timestamp].apply(
+                            lambda t: ignore_time_slot(t, event_start_time, event_end_time)
+                        )
                 else:
-                    df.loc[(df[col_date] == date) & (df[col_name] == user), col_timestamp].apply(
-                        lambda t: coerce_time_slot(t, event_start_time, event_end_time)
-                    )
+                    df.loc[(df[col_date] == date) & (df[col_name] == user), col_timestamp] = \
+                        df.loc[(df[col_date] == date) & (df[col_name] == user), col_timestamp].apply(
+                            lambda t: coerce_time_slot(t, event_start_time, event_end_time)
+                        )
 
     # Dropping duplicate rows, keeping the first occurrence:
-    df = df.dropna(how="any").drop_duplicates(subset=[col_name, col_timestamp], keep="first")
+    df = df.dropna().drop_duplicates(subset=[col_name, col_timestamp], keep="first")
 
     all_users = df[col_name].unique().tolist()
 

@@ -4,11 +4,12 @@
 # Capgemini (Brazil) - www.capgemini.com/br-pt
 # "People matter, results count"
 
+from datetime import datetime
 import streamlit as st
 import logging
 import time
 
-from src.utils import setup_logger, load_csv, df_to_bytes
+from src.utils import setup_logger, load_csv, df_to_bytes, get_settings, sting_to_time, time_to_string
 from src import operations
 
 
@@ -18,7 +19,7 @@ setup_logger(__name__)
 def main() -> None:
     st.set_page_config(page_title="♤ Capgemini: I&D Tech Talks", page_icon="♠")
 
-    st.sidebar.write('**INPUT**')
+    st.sidebar.write('**EVENTS**')
 
     input_files = st.sidebar.file_uploader(
         "Attendance list files",
@@ -32,6 +33,12 @@ def main() -> None:
         help="Ignore users not present at the time the attendance list was generated"
     )
 
+    event_settings = get_settings()['spreadsheets']['event']
+    default_event_start_time = event_settings['start_time']
+    default_event_end_time = event_settings['end_time']
+    event_start_time = st.sidebar.time_input('Start time', sting_to_time(default_event_start_time))
+    event_end_time = st.sidebar.time_input('End time', sting_to_time(default_event_end_time))
+
     users_list = []
     num_vouchers = 2
     ignore_users = []
@@ -41,7 +48,7 @@ def main() -> None:
     df = None
 
     st.sidebar.markdown("""---""")
-    st.sidebar.write('**PROCESS**')
+    st.sidebar.write('**PROCESSES**')
     operation_type = st.sidebar.selectbox("Operation type", operations.TYPES)
 
     if operation_type == operations.ATTENDANCE_LIST:
@@ -55,6 +62,8 @@ def main() -> None:
         df_list = load_csv(input_files)
         df = operations.get_attendance_list(
             df_list=df_list,
+            event_start_time=time_to_string(event_start_time),
+            event_end_time=time_to_string(event_end_time),
             ignore_inactive_users=ignore_inactive_users,
             calculate_overall_uptime=calculate_overall_uptime
         )

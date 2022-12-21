@@ -5,6 +5,7 @@
 # "People matter, results count"
 
 from streamlit.runtime.uploaded_file_manager import UploadedFile
+from datetime import datetime
 from typing import Union
 import streamlit as st
 import pandas as pd
@@ -175,3 +176,15 @@ def setup_logger(
         secondary_logger.setLevel(secondary_level)
 
     return logger
+
+
+def sting_to_time(string: str, format: str = "%H:%M") -> datetime.time:
+    dt_time = datetime.strptime(string, format).time()
+
+    return dt_time
+
+
+def time_to_string(dt_time: datetime.time, format: str = "%H:%M") -> str:
+    string = dt_time.strftime(format)
+
+    return string

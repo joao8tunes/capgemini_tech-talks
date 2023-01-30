@@ -44,5 +44,8 @@ Run Streamlit application:
 (venv) user@host:~$ streamlit run .\streamlit_app.py
 ```
 
+To generate a list of attendees for the month, you can upload multiple attendance lists. 
+We recommend that you disable the "Ignore inactive users" option, to also include users who left during the events.
+
 
 \* Windows OS syntax-based commands.

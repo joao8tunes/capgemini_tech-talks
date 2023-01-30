@@ -31,11 +31,13 @@ TRANSLATIONS = {
         'User Action': "User Action",
         'Atividade': "User Action",
         'Timestamp': "Timestamp",
-        'Carimbo de data/hora': "Timestamp"
+        'Carimbo de data/hora': "Timestamp",
+        'Data e hora': "Timestamp",
     },
     'users_actions': {
         'Joined': "Joined",
         'Ingressou': "Joined",
+        'Entrou': "Joined",
         'Joined before': "Joined before",
         'Entrou antes de': "Joined before",
         'Left': "Left",
@@ -44,13 +46,13 @@ TRANSLATIONS = {
 }
 
 
-def translate_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+def translate_dataframe(df: pd.DataFrame, force_header: bool = True) -> pd.DataFrame:
     def translate_header_column(string: str) -> str:
         translation = TRANSLATIONS['header'][string]
 
         return translation
 
-    if not df.columns[0] in ["Full Name", "Nome Completo"]:
+    if force_header or not df.columns[0] in ["Full Name", "Nome Completo"]:
         new_header = ["Full Name", "User Action", "Timestamp"]
         df.loc[len(df)] = list(df.columns)
     else:
@@ -147,7 +149,7 @@ def get_attendance_list(
         df = translate_dataframe(df)
         df[col_name] = df[col_name].str.upper()
         df[col_timestamp] = pd.to_datetime(df[col_timestamp], infer_datetime_format=True, errors="coerce")
-        df = df.dropna(how="any").sort_values(by=[col_action])
+        df = df.dropna(how="any").sort_values(by=[col_timestamp])
         users = df[col_name].unique().tolist()
         active_users = []
 
@@ -227,7 +229,6 @@ def get_attendance_list(
         user_dates = df_user[col_date].unique().tolist()
 
         for date in user_dates:
-            start_time = pd.to_datetime(f"{date} {event_start_time}", infer_datetime_format=True, errors="coerce")
             end_time = pd.to_datetime(f"{date} {event_end_time}", infer_datetime_format=True, errors="coerce")
             df_user_actions = df_user[df_user[col_date] == date]
 

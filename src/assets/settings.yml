@@ -24,11 +24,13 @@ spreadsheets:
     operations:
         giveaway_voucher:
             drop_users:  # Warning: it must drop accents from names.
+                # Tech Talks team:
                 - Eugenio Ferreira Cabral
                 - Gerson Tavares Junior
                 - Luis Alexandre Miguel de Oliveira Bertozzo
                 - Joao Vitor Antunes Ribeiro
                 - Rafael Luiz Silva de Queiroz
+                # Capgemini managers:
                 - Jose Falcao de Moura Neto
                 - Thiago Cunha Nascimento
                 - Caue Moresi

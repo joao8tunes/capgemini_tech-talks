@@ -73,6 +73,8 @@ def format_user_name(user_name: str) -> str:
     else:
         formatted_name = user_name
 
+    formatted_name = formatted_name.upper()
+
     return formatted_name
 
 
@@ -283,7 +285,7 @@ def extract_users_list(df: pd.DataFrame, sort_names: bool = True) -> [str]:
 
 def giveaway_vouchers(
         users_list: [str],
-        number: int = 2,
+        number: int = 3,
         allow_duplicates: bool = False,
         ignore_users: [str] = None
 ) -> pd.DataFrame:

@@ -21,6 +21,18 @@ spreadsheets:
         check_time_slot: true  # TODO: Experimental
         check_user_name: true  # TODO: Experimental
         check_user_name_similarity: 0.9
+    operations:
+        giveaway_voucher:
+            drop_users:  # Warning: it must drop accents from names.
+                - Eugenio Ferreira Cabral
+                - Gerson Tavares Junior
+                - Luis Alexandre Miguel de Oliveira Bertozzo
+                - Joao Vitor Antunes Ribeiro
+                - Rafael Luiz Silva de Queiroz
+                - Caue Paiva Moresi
+                - Caue Moresi
+                - Rafael Kawaguti de Oliveira
+                - Bernardo Rodrigues Caldeira
     attendance_list:
         user_name: "Full Name"
         user_action: "User Action"

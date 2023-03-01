@@ -40,7 +40,7 @@ def main() -> None:
     event_end_time = st.sidebar.time_input('End time', sting_to_time(default_event_end_time))
 
     users_list = []
-    num_vouchers = 2
+    num_vouchers = 3
     ignore_users = []
     allow_duplicates = False
     calculate_overall_uptime = False
@@ -71,8 +71,12 @@ def main() -> None:
         users_list = operations.extract_users_list(df=df)
 
     if operation_type == operations.ATTENDANCE_LIST_DRAW_VOUCHER:
-        num_vouchers = st.sidebar.slider("Number of vouchers", min_value=1, max_value=10, value=2)
-        ignore_users = st.sidebar.multiselect("Ignore users", users_list, [])
+        num_vouchers = st.sidebar.slider("Number of vouchers", min_value=1, max_value=10, value=3)
+        settings = operations.get_settings()
+        drop_users = settings['spreadsheets']['operations']['giveaway_voucher']['drop_users']
+        drop_users = [operations.format_user_name(n) for n in drop_users] if drop_users else []
+        drop_users = [n for n in drop_users if n in users_list]
+        ignore_users = st.sidebar.multiselect("Ignore users", users_list, drop_users)
         allow_duplicates = st.sidebar.checkbox("Allow duplicates winners", value=False)
 
     if st.sidebar.button("Run") and input_files:

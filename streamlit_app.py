@@ -75,7 +75,7 @@ def main() -> None:
         settings = operations.get_settings()
         drop_users = settings['spreadsheets']['operations']['giveaway_voucher']['drop_users']
         drop_users = [operations.format_user_name(n) for n in drop_users] if drop_users else []
-        drop_users = [n for n in drop_users if n in users_list]
+        drop_users = sorted([n for n in drop_users if n in users_list])
         ignore_users = st.sidebar.multiselect("Ignore users", users_list, drop_users)
         allow_duplicates = st.sidebar.checkbox("Allow duplicates winners", value=False)
 

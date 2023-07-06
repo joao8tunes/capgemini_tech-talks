@@ -286,7 +286,8 @@ def extract_users_list(df: pd.DataFrame, sort_names: bool = True) -> [str]:
 def giveaway_vouchers(
         users_list: [str],
         number: int = 3,
-        allow_duplicates: bool = False,
+        block_duplicates: bool = True,
+        block_lucky: bool = True,
         ignore_users: [str] = None
 ) -> pd.DataFrame:
     assert 1 <= number
@@ -299,10 +300,15 @@ def giveaway_vouchers(
     if ignore_users:
         users_list = [user for user in users_list if user not in ignore_users]
 
+    if block_lucky:
+        lucky_users = settings['spreadsheets']['operations']['giveaway_voucher']['lucky_users']
+        lucky_users = sorted(set([format_user_name(n) for n in lucky_users])) if lucky_users else []
+        users_list = [user for user in users_list if user not in lucky_users]
+
     attendance_list_count = len(users_list)
     lucky_users = []
 
-    if not allow_duplicates and not number <= attendance_list_count:
+    if block_duplicates and not number <= attendance_list_count:
         logging.warning(
             f"The number of winners cannot be greater than the size of the attendance list "
             f"(number <= {attendance_list_count})."
@@ -312,7 +318,7 @@ def giveaway_vouchers(
         selected_user = random.choice(users_list)
         lucky_users.append(selected_user)
 
-        if not allow_duplicates:
+        if block_duplicates:
             users_list.remove(selected_user)
 
             if not users_list:

@@ -42,7 +42,8 @@ def main() -> None:
     users_list = []
     num_vouchers = 3
     ignore_users = []
-    allow_duplicates = False
+    block_duplicates = True
+    block_lucky = False
     calculate_overall_uptime = False
     df_list = None
     df = None
@@ -73,11 +74,22 @@ def main() -> None:
     if operation_type == operations.ATTENDANCE_LIST_DRAW_VOUCHER:
         num_vouchers = st.sidebar.slider("Number of vouchers", min_value=1, max_value=10, value=3)
         settings = operations.get_settings()
+
         drop_users = settings['spreadsheets']['operations']['giveaway_voucher']['drop_users']
         drop_users = [operations.format_user_name(n) for n in drop_users] if drop_users else []
         drop_users = sorted(set([n for n in drop_users if n in users_list]))
+
         ignore_users = st.sidebar.multiselect("Ignore users", users_list, drop_users)
-        allow_duplicates = st.sidebar.checkbox("Allow duplicates winners", value=False)
+        block_duplicates = st.sidebar.checkbox(
+            "Block winning duplicates",
+            value=True,
+            help="Prevents the same user from winning more than once at the time of the draw"
+        )
+        block_lucky = st.sidebar.checkbox(
+            "Block lucky users",
+            value=False,
+            help="Ignore users who have already been drawn"
+        )
 
     if st.sidebar.button("Run") and input_files:
         logging.debug(f"Executing operation '{operation_type}'...")
@@ -113,8 +125,9 @@ def main() -> None:
             df = operations.giveaway_vouchers(
                 users_list=users_list,
                 number=num_vouchers,
-                allow_duplicates=allow_duplicates,
-                ignore_users=ignore_users
+                block_duplicates=block_duplicates,
+                ignore_users=ignore_users,
+                block_lucky=block_lucky
             )
             st.write("List of winners:")
             st.dataframe(df, use_container_width=True)

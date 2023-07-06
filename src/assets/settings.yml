@@ -22,23 +22,71 @@ spreadsheets:
         check_user_name: true  # TODO: Experimental
         check_user_name_similarity: 0.9
     operations:
-        giveaway_voucher:
-            drop_users:  # Warning: it must drop accents from names.
-                # Tech Talks team:
-                - Eugenio Ferreira Cabral
-                - Gerson Tavares Junior
-                - Luis Alexandre Miguel de Oliveira Bertozzo
-                - Joao Vitor Antunes Ribeiro
-                - Rafael Luiz Silva de Queiroz
-                # Capgemini managers:
-                - Jose Falcao de Moura Neto
-                - Thiago Cunha Nascimento
-                - Caue Moresi
-                - Rafael Kawaguti de Oliveira
-                - Bernardo Rodrigues Caldeira
-                - Rogerio Carosi
-                - Carmen Alejandra Clementino
-                - Juliana de Campos Vieira
+        giveaway_voucher:  # Warning: it must drop accents from names.
+            drop_users:  # Users not to be included in the draw.
+                - BERNARDO RODRIGUES CALDEIRA
+                - CARMEN ALEJANDRA CLEMENTINO
+                - CAUE MORESI
+                - CAUE ROBERTO PAIVA MORESI
+                - EUGENIO FERREIRA CABRAL
+                - GERSON TAVARES JUNIOR
+                - JOAO VITOR ANTUNES RIBEIRO
+                - JOSE FALCAO DE MOURA NETO
+                - JULIANA DE CAMPOS VIEIRA
+                - RAFAEL KAWAGUTI DE OLIVEIRA
+                - RAFAEL LUIZ SILVA DE QUEIROZ
+                - ROGERIO CAROSI
+                - THIAGO CUNHA NASCIMENTO
+            lucky_users:  # Users who have already been drawn.
+                - ADEJEAN PASSIDONIO CARDOSO
+                - AILTON DE OLIVEIRA
+                - ANGELICA DOS SANTOS
+                - ANNIE NOBREGA GASPAR
+                - ARMANDO BARBOSA SOBRINHO
+                - BEATRIZ DANTAS MARQUES
+                - BERNARD BARRETO THIEL COSTA
+                - BRUNO LEONARDO SANTOS MENEZES
+                - BRUNO LIMA DE SANTANA
+                - CAMILA DE MORAES QUEIROZ
+                - CAMILLA MIRANDA GARCIA SANTOS
+                - CARLOS EDUARDO RODRIGUES SOARES
+                - CARMEN ALEJANDRA CLEMENTINO
+                - DEBORAH TAHIS DA COSTA FERREIRA
+                - DIEGO DE SOUZA
+                - DIOGO ANTONIO DA SILVA
+                - DIOGO SCHUARZ
+                - EMMANUEL NAZARETH BRAVO DA COSTA
+                - ERINALDO FERREIRA DOS SANTOS
+                - FERNANDA LORENTE KEMP
+                - FRANCISCO SEBASTIAN TACORA AMASIFUEN
+                - GABRIEL DOS SANTOS NASCIMENTO
+                - GERSON TAVARES JUNIOR
+                - GUSTAVO BARRETO RESENDE
+                - GUSTAVO RODRIGUES SABINO
+                - HERLLON ALVES SA
+                - ILMAR WERNECK STEIN
+                - JAQUELINE ALVARENGA
+                - JAQUELINE ALVARENGA SILVEIRA
+                - LINDOMAR RAMOS DE SOUSA
+                - LORENA RAISSA SILVA DA SILVA
+                - MARCOS FARAH NAGATO
+                - MATHEUS SANTOS GUANAZ
+                - MOISES DO CARMO PESSOA
+                - NICOLAS FERREIRA
+                - PATRICIA APARECIDA DE SOUZA
+                - PATRICIA APARECIDA VIEIRA
+                - PAULO EDUARDO DE OLIVEIRA DAMICO
+                - PAULO HENRIQUE MENDES
+                - PEDRO LUIZ PEREIRA MARTINS
+                - RAPHAEL MIRANDA E SILVA
+                - RENAN FELIPE DE OLIVEIRA
+                - RICK STEVEN SANTOS ANDRADE
+                - RODRIGO RUSSO SANCHES
+                - ROMULO DA SILVA ARAUJO
+                - RUBENS UBALDO DE MEDEIROS MENDONÇA
+                - SERGIO FARIAS DE ALBUQUERQUE
+                - THIAGO FERNANDO GARCIA
+                - THIAGO PEREIRA
     attendance_list:
         user_name: "Full Name"
         user_action: "User Action"

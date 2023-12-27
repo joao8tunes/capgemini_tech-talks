@@ -10,8 +10,8 @@ import logging
 import random
 import math
 
+from src.utils import get_settings, now
 from src.handlers import find_string
-from src.utils import get_settings
 
 ATTENDANCE_LIST = "attendance_list"
 ATTENDANCE_LIST_COUNT = "attendance_list_count"
@@ -54,7 +54,6 @@ def translate_dataframe(df: pd.DataFrame, force_header: bool = True) -> pd.DataF
 
     if force_header or not df.columns[0] in ["Full Name", "Nome Completo"]:
         new_header = ["Full Name", "User Action", "Timestamp"]
-        df.loc[len(df)] = list(df.columns)
     else:
         new_header = list(map(translate_header_column, list(df.columns)))
 
@@ -150,7 +149,12 @@ def get_attendance_list(
     for df in df_list:
         df = translate_dataframe(df)
         df[col_name] = df[col_name].str.upper()
-        df[col_timestamp] = pd.to_datetime(df[col_timestamp], infer_datetime_format=True, errors="coerce")
+
+        if not df[col_timestamp].isnull().any():
+            df[col_timestamp] = pd.to_datetime(df[col_timestamp], infer_datetime_format=True, errors="coerce")
+        else:
+            df[col_timestamp] = now()
+
         df = df.dropna(how="any").sort_values(by=[col_timestamp])
         users = df[col_name].unique().tolist()
         active_users = []
@@ -170,7 +174,10 @@ def get_attendance_list(
         attendance_list.append(df[[col_name, col_action, col_timestamp]])
 
     df = pd.concat(attendance_list)
-    df[col_date] = df[col_timestamp].dt.date
+
+    if not df[col_timestamp].isnull().any():
+        df[col_date] = df[col_timestamp].dt.date
+
     df[col_duration] = 0
 
     if format_names:

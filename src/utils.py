@@ -11,6 +11,7 @@ import streamlit as st
 import pandas as pd
 import coloredlogs
 import logging
+import pytz
 import yaml
 import sys
 import os
@@ -67,7 +68,14 @@ def load_csv(path: Union[str, UploadedFile], **kwargs) -> [pd.DataFrame]:
         for file in path:
             if file is not None:
                 try:
-                    df = pd.read_csv(filepath_or_buffer=file, sep=sep, encoding=encoding, **kwargs)
+                    df = pd.read_csv(
+                        filepath_or_buffer=file,
+                        sep=sep,
+                        encoding=encoding,
+                        skip_blank_lines=True,
+                        **kwargs
+                    ).dropna(how="all")
+
                     df_list.append(df)
                 except Exception as e:
                     logging.error(f"Failed to read CSV file '{file.name}': {e}")
@@ -80,13 +88,27 @@ def load_csv(path: Union[str, UploadedFile], **kwargs) -> [pd.DataFrame]:
 
                 if os.path.isfile(abs_filepath):
                     try:
-                        df = pd.read_csv(filepath_or_buffer=abs_filepath, sep=sep, encoding=encoding, **kwargs)
+                        df = pd.read_csv(
+                            filepath_or_buffer=abs_filepath,
+                            sep=sep,
+                            encoding=encoding,
+                            skip_blank_lines=True,
+                            **kwargs
+                        ).dropna(how="all")
+
                         df_list.append(df)
                     except Exception as e:
                         logging.error(f"Failed to read CSV file '{abs_filepath}': {e}")
         else:
             try:
-                df = pd.read_csv(filepath_or_buffer=abs_path, sep=sep, encoding=encoding, **kwargs)
+                df = pd.read_csv(
+                    filepath_or_buffer=abs_path,
+                    sep=sep,
+                    encoding=encoding,
+                    skip_blank_lines=True,
+                    **kwargs
+                ).dropna(how="all")
+
                 df_list.append(df)
             except Exception as e:
                 logging.error(f"Failed to read CSV file '{abs_path}': {e}")
@@ -188,3 +210,24 @@ def time_to_string(dt_time: datetime.time, format: str = "%H:%M") -> str:
     string = dt_time.strftime(format)
 
     return string
+
+
+def now(tmz: str = "America/Sao_Paulo") -> datetime:
+    """
+    Get now as datetime, using current time as reference.
+
+    Returns
+    -------
+    dt: datetime
+        Datetime.
+    tmz: str
+        Timezone.
+
+    References
+    ----------
+    .. [1] All timezones: https://pythonhosted.org/pytz/#helpers
+    """
+    dt = datetime.now(pytz.timezone(tmz)) if tmz is not None else datetime.utcnow()
+    dt = dt.replace(tzinfo=None)  # Avoiding "TypeError: can't subtract offset-naive and offset-aware datetimes" error.
+
+    return dt
